@@ -1,3 +1,5 @@
 package models
 
-type Rates
+type Rates struct {
+	
+}
