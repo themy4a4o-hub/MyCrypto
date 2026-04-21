@@ -4,11 +4,14 @@ export
 
 export PROJECT_ROOT
 env-up:
-	@docker compose up -d crypto-postgres
+	@docker compose up -d
 
 env-down:
-	@docker compose down crypto-postgres
+	@docker compose down -v
 
+info: 
+	@docker compose ps -a
+	
 env-cleanup:
 	@read -p "Delete all volume data? This will erase database files [y/N] :" ans; \
 	if [ "$$ans" = "y" ]; then\

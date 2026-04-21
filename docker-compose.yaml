@@ -1,10 +1,17 @@
+x-common-env: &common-env
+  POSTGRES_USER: postgres_user
+  POSTGRES_PASSWORD: postgres_password
+  POSTGRES_DB: mydb
+  POSTGRES_HOST: crypto-postgres
+  POSTGRES_PORT: 5432
 services:
   crypto-postgres:
     image: postgres:18.3-bookworm
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      <<: *common-env
+      # - POSTGRES_USER=${POSTGRES_USER}
+      # - POSTGRES_DB=${POSTGRES_DB}
+      # - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -20,12 +27,12 @@ services:
       crypto-postgres:
         condition: service_healthy
     volumes:
-      - ${PROJECT_ROOT}/migrations:/migrations
+      - ./migrations:/migrations
     command:
       - "-path"
       - "/migrations"
       - "-database"
-      - "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@crypto-postgres:5433/${POSTGRES_DB}?sslmode=disable"
+      - "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@crypto-postgres:5432/${POSTGRES_DB}?sslmode=disable"
       - "up"
   
   crypto-app:
@@ -34,20 +41,23 @@ services:
       dockerfile: docker/Dockerfile
   
     depends_on:
-      - crypto-postgres
+      crypto-postgres:
+        condition: service_healthy
     
     environment:
-      - DB_HOST=crypto-postgres
-      - DB_PORT=5432
-      - DB_USER=${POSTGRES_USER}
-      - DB_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_NAME=${POSTGRES_DB}
+      <<: *common-env
+      # DB_HOST: crypto-postgres
+      # DB_PORT: "5432"
+      # - DB_USER=${POSTGRES_USER}
+      # - DB_PASSWORD=${POSTGRES_PASSWORD}
+      # - DB_NAME=${POSTGRES_DB}
     ports:
       - "8080:8080"
+    restart: on-failure
   
-  port-forwarder:
-    image: alpine/socat:1.8.0.3
-    container_name: cryptoapp-postgres-port-forwarder
-    command: tcp-listen:5432,fork,reuseaddr tcp-connect:crypto-postgres:5432
-    ports:
-      - "127.0.0.1:5432:5432"
+  # port-forwarder:
+  #   image: alpine/socat:1.8.0.3
+  #   container_name: cryptoapp-postgres-port-forwarder
+  #   command: tcp-listen:5432,fork,reuseaddr tcp-connect:crypto-postgres:5432
+  #   ports:
+  #     - "127.0.0.1:5433:5432"

@@ -15,7 +15,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/app /app/app
-
+COPY --from=builder /app/migrations /app/migrations
 RUN chmod +x /app/app
 
 EXPOSE 8080
