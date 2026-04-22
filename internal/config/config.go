@@ -12,7 +12,7 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		DBHOST: getEnv("POSTGRES_HOST", "ctypto-postgres"),
+		DBHOST: getEnv("POSTGRES_HOST", "crypto-postgres"),
 		DBPORT: getEnv("POSTGRES_PORT", "5432"),
 		DBUSER: getEnv("POSTGRES_USER", "postgres_user"),
 		DBPASS: getEnv("POSTGRES_PASSWORD", "postgres_password"),

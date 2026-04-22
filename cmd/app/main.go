@@ -14,6 +14,7 @@ import (
 	"github.com/themy4a4o-hub/mycrypto/internal/db"
 	"github.com/themy4a4o-hub/mycrypto/internal/models"
 	"github.com/themy4a4o-hub/mycrypto/internal/repository"
+	"github.com/themy4a4o-hub/mycrypto/internal/service"
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 
 	sqlxDB := sqlx.NewDb(sqlDB, "postgres")
 	ctx := context.Background()
-	
+
 	testRate := models.Rates{
 		Id:             1,
 		Cryptocurrency: "BTC",
@@ -48,7 +49,13 @@ func main() {
 		log.Fatalf("Ошибка получения последней записи из базы данных %v", err)
 	}
 	log.Printf("Успешное чтение из базы данных: %+v", savedRate)
+	rateService := service.NewRateService(rateRepo)
+	stats, err := rateService.GetCurrentStats(ctx)
+	if err != nil {
+		log.Printf("Ошибка получения статистики : %v", err)
 
+	}
+	log.Printf("Статистика: %+v", stats)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit

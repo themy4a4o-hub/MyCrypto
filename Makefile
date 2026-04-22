@@ -27,6 +27,12 @@ env-port-forward:
 
 env-port-close:
 	@docker compose down port-forwarder
+
+app-build: 
+	@docker compose build --no-cache crypto-app
+
+docker-log:
+	@docker compose logs -f crypto-app
 	
 migrate-create:
 	@if [ -z "$(seq)" ]; then \
